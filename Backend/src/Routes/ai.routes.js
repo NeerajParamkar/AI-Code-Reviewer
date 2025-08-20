@@ -1,7 +1,8 @@
-const express=require('express');
+import express from 'express';
 const router=express.Router();
-const aiController=require("../Controllers/ai.controller")
+import aiController from "../Controllers/ai.controller.js";
+
 
 router.post('/get-review',aiController.getReview)
 
-module.exports=router
+export default router; 

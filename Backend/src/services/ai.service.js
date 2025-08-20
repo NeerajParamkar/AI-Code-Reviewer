@@ -1,5 +1,6 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-require("dotenv").config();
+import dotenv from "dotenv";
+dotenv.config();
+import { GoogleGenerativeAI } from "@google/generative-ai"
 
 async function GetInfoResponse(prompt, prm) {
 
@@ -12,5 +13,4 @@ async function GetInfoResponse(prompt, prm) {
   const result = await model.generateContent(prompt);
   return result.response.text();
 }
-
-module.exports = { GetInfoResponse };
+export default { GetInfoResponse }; 

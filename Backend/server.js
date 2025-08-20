@@ -1,5 +1,8 @@
-require('dotenv').config()
-const app=require('./src/app')
+import dotenv from "dotenv";
+
+dotenv.config();
+
+import app from './src/app.js'
 
 
 app.listen(3000,()=>{

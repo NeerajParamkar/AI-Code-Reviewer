@@ -19,11 +19,31 @@ function App() {
   const [openTask, setopenTask] = useState(false);
   const [selectedTask, setselectedTask] = useState("Select");
   const [selectedError,setselectedError]=useState(false);
-  const options1 = ["Review Code","Fix Bugs","Calculate TC and SC"];
+  const [isOpen, setIsOpen] = useState(false);
+  const [fileName, setFileName] = useState("");
+  const [storeResponce, setStoreResponce] = useState("");
+  const [navbar, setNavbar] = useState(false);
+  const [responceData, setResponceData] = useState(false);
 
+
+
+    const handleSave = async () => {
+    console.log("Saving response as:", fileName)
+    try {
+      const response = await axios.post("http://localhost:3000/ai/data", {
+        fileName,review,code
+      });
+      console.log(response.data)
+    } catch (err) {
+      setReview("⚠️ Error in saving the responce");
+    }
+    setIsOpen(false);
+    setFileName("");
+  };
+
+  const options1 = ["Review Code","Fix Bugs","Calculate TC and SC"];
   const options2 = ["JavaScript", "Python", "C++", "Java","Other"];
 
-  
   useEffect(() => {
     Prism.highlightAll();
   }, []);
@@ -37,6 +57,13 @@ function App() {
 }, [selected, selectedTask]);
 
 
+useEffect(() => {
+  if (responceData) {
+    document.body.classList.add("overflow-hidden");
+  } else {
+    document.body.classList.remove("overflow-hidden");
+  }
+}, [responceData]);
   async function reviewCode() {
     try {
       setLoading(true);
@@ -45,7 +72,7 @@ function App() {
       });
       setReview(response.data);
     } catch (err) {
-      setReview("⚠️ Error while fetching review");
+      setReview("⚠️ Please Connect to Internet");
     } finally {
       setLoading(false);
     }
@@ -61,6 +88,19 @@ function App() {
   return (
     <>
     <main className="h-screen w-full bg-gradient-to-br from-gray-950 to-gray-900 flex items-center justify-center p-6">
+    <div onClick={()=>{navbar ? setNavbar(false): setNavbar(true)}} className="bg-gradient-to-r from-purple-600 to-indigo-600 cursor-pointer absolute right-5 top-5 rounded-full p-2 px-3 z-888">N</div>
+    {navbar && (<div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl shadow-lg absolute right-15 top-5 h-29 w-40 p-3 z-888 ">
+  <button className="px-3 m-2 py-1 w-33 bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition">
+    View Profile
+  </button>
+  <button onClick={()=>{setResponceData(true),setNavbar(false)}} className="cursor-pointer px-3 py-1 m-2 w-33  bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition opacity-900">
+    See Responses
+  </button>
+</div>
+)}
+    {responceData &&(
+      <div className="bg-gradient-to-r from-gray-600 to-gray-800 rounded-xl shadow-lg absolute h-[80%] w-[90%] m-100 p-3 z-888 flex">This is saved responce <div onClick={()=>{setResponceData(false)}} className="absolute right-6 bg-amber-50 p-3 rounded-full cursor-pointer">X</div></div>
+    )}
       <div className="bg-gray-900 border border-gray-700 shadow-xl rounded-7xl w-full max-w-5xl h-full flex flex-col relative ">
         <div className="flex-1 relative overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
           <Editor
@@ -191,7 +231,7 @@ function App() {
           <h1 className="text-2xl sm:text-3xl font-serif text-purple-400 drop-shadow-md text-center sm:text-left">
           ✨ After Review ✨
           </h1>
-          <button onClick={()=>{}} className="px-4 sm:px-6 py-2 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-indigo-600  text-white rounded-xl shadow-lg hover:scale-105 transition-transform"
+          <button onClick={() => setIsOpen(true)} className="px-4 sm:px-6 py-2 text-sm sm:text-base bg-gradient-to-r from-purple-600 to-indigo-600  text-white rounded-xl shadow-lg hover:scale-105 transition-transform cursor-pointer"
           >
           💾 Save Response
           </button>
@@ -201,6 +241,37 @@ function App() {
             {review}
             </Markdown>
           </div>
+            {isOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/40">
+          <div className="bg-gray-600 rounded-2xl shadow-lg p-6 w-80 sm:w-96 animate-fadeIn">
+            <h2 className="text-lg font-semibold text-gray-300 mb-4 text-center">
+              Enter Name to Save Response
+            </h2>
+            <input
+              type="text"
+              value={fileName}
+              onChange={(e) => setFileName(e.target.value)}
+              placeholder="Enter file name..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none"
+            />
+            <div className="flex justify-end gap-3 mt-5">
+              <button
+                onClick={() => setIsOpen(false)}
+                className="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-800 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { handleSave();setStoreResponce(review)}}
+                disabled={!fileName.trim()}
+                className="px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md hover:scale-105 transition disabled:opacity-50"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
           </div>
 
         ) : (

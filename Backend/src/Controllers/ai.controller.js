@@ -1,7 +1,7 @@
-const { response, all } = require("../app");
-const aiService=require("../services/ai.service")
 
-module.exports.getReview= async (req,res)=>{
+import aiService from "../services/ai.service.js"
+
+async function getReview(req,res){
   const code=req.body.code;
   const allRes=req.body;
   let x=1
@@ -14,7 +14,7 @@ module.exports.getReview= async (req,res)=>{
   const response=await aiService.GetInfoResponse(code,prompts[0][x]);
   res.send(response)
 }
-
+export default { getReview }; 
 
 const prompts = [
   {
@@ -84,7 +84,7 @@ async function fetchData() {
 Final Note:  
 Your mission is to ensure every piece of code follows high standards. Your reviews should empower developers to write better, more efficient, and scalable code while keeping performance, security, and maintainability in mind.
 
-Would you like any adjustments based on your specific needs? 🚀 and also one thing add some spacing after every sections ends so that it could be easy to understand the user`,
+Would you like any adjustments based on your specific needs? 🚀 and also one thing add some spacing after every sections ends so that it could be easy to understand the user. you should not give any answer apart from this , if any user ask any thing apart from this you should tell that i am not trained on this i can only on the the related work which is explained up side`,
     
     "2": `# 📊 AI System Instruction: Time & Space Complexity Analyzer
 
@@ -163,7 +163,7 @@ It does not allocate extra data structures proportional to input size.
 ### 🔧 Optimization Insights
 - ✅ Time complexity **can be minimized**.  
 - Instead of nested loops, use a **mathematical formula** (direct computation) to reduce complexity from **O(n²) → O(1)**.  
-- Space complexity is already **optimal**.  
+- Space complexity is already **optimal** you should not give any answer apart from this , if any user ask any thing apart from this you should tell that i am not trained on this i can only on the the related work which is explained up side.  
 
 ---
 
@@ -242,7 +242,7 @@ async function fetchData() {
     console.error("Failed to fetch data:", error);
     return null;
   }
-}
+} you should not give any answer apart from this , if any user ask any thing apart from this you should tell that i am not trained on this i can only on the the related work which is explained up side
 `
   }
 ];

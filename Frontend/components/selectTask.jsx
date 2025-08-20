@@ -7,7 +7,7 @@ export default function SelectedTask() {
   const options = ["Review code","fix bugs","calculate tc and sc"];
 
   return (
-    <div className="relative inline-block w-full md:w-42 ">
+    <div className="relative inline-block w-full md:w-52 ">
       <button
         onClick={() => setopenTask(!openTask)}
         className="w-full px-4 py-2 text-xs md:text-sm lg:text-base bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl shadow-lg flex justify-center gap-4 items-center"

@@ -2,7 +2,7 @@ import { useState } from "react";
 
 export default function Dropdown() {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState("tech");
+  const [selected, setSelected] = useState("Select");
 
   const options = ["JavaScript", "Python", "C++", "Java","Other"];
 

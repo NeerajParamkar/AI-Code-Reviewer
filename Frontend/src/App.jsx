@@ -25,8 +25,14 @@ function App() {
   const [responceData, setResponceData] = useState(false);
   const [responcesTOshow, setresponcesTOshow] = useState("");
   const [openLogin, setOpenlogin] = useState(false);
+  const [activeReview, setActiveReview] = useState(null);
 
-
+  const formatDate = (dateStr) => {
+    return new Date(dateStr).toLocaleString("en-IN", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  };
 
 
     const handleSave = async () => {
@@ -117,20 +123,75 @@ useEffect(() => {
 )}
 
     {responceData && responcesTOshow && (
-      <div className="bg-gradient-to-r from-gray-600 to-gray-800 rounded-xl shadow-lg absolute h-[80%] w-[90%] m-100 p-3 z-888 overflow-y-auto hide-scrollbar">{responcesTOshow && (
-        responcesTOshow.map((item, idx) => (
-          <div key={idx}>
-            <p>{item.reviewName}</p>
-            <p>{item.reviewData}</p>
-            <p>{item.reviewCode}</p>
-            <p>{item.createdAt}</p>
-          </div>
-        ))
+       <div className="dark-scroll bg-gradient-to-r from-gray-400 to-gray-400 rounded-xl shadow-lg absolute h-[80%] w-[90%] p-4 z-50 overflow-y-auto ">
+      <div
+        onClick={() => {setResponceData(false),setActiveReview(null)}}
+        className="absolute right-6 top-5 bg-amber-50 text-black font-bold p-3 rounded-full cursor-pointer hover:bg-amber-200 transition z-999"
+      >
+        ✕
+      </div>
 
-        
-      
-    )}<div onClick={()=>{setResponceData(false)}} className="absolute right-6 top-5 bg-amber-50 p-3 rounded-full cursor-pointer ">X</div></div>
+      {responcesTOshow && responcesTOshow.length > 0 ? (
+        <div className="grid gap-4">
+          {responcesTOshow.map((item, idx) => (
+            <div
+              key={idx}
+              onClick={() => setActiveReview(item)}
+              className="bg-gray-900 rounded-xl p-4 shadow-md cursor-pointer hover:scale-[1.02] transition"
+            >
+              {/* Review Name */}
+              <h2 className="text-xl font-bold text-purple-400 mb-2">
+                {item.reviewName}
+              </h2>
+
+              {/* Short Data */}
+              <p className="text-gray-300 line-clamp-2">{item.reviewData}</p>
+
+              {/* Date */}
+              <p className="text-gray-400 text-xs mt-3">
+                {formatDate(item.createdAt)}
+              </p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="text-gray-300">No responses saved yet.</p>
+      )}
+
+      {/* Modal for full details */}
+    </div>
     )}
+    {activeReview && (
+        <div className="dark-scroll fixed overflow-auto  inset-0 bg-black/70  z-50">
+          <div className="bg-gray-800 rounded-2xl p-6  w-full shadow-lg">
+            <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-white to-white font-extrabold text-xl sm:text-2xl md:text-3xl lg:text-4xl  mb-6 drop-shadow-md">
+              {activeReview.reviewName}
+            </h2>
+            <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 font-extrabold text-xl sm:text-2xl  mb-6 drop-shadow-md">
+            Question
+            </h2>
+            <pre className="dark-scroll bg-black/60 text-green-400 p-3 rounded-lg overflow-x-auto mb-4">
+              {activeReview.reviewCode}
+            </pre>
+            <h2 className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600 font-extrabold text-xl sm:text-2xl mb-6 drop-shadow-md">
+            Approach
+            </h2>
+            <pre className="dark-scroll bg-black/60 text-green-400 p-3 rounded-lg overflow-x-auto mb-4">
+              {activeReview.reviewData}
+            </pre>
+            <p className="text-gray-400 text-sm">
+              Saved on: {formatDate(activeReview.createdAt)}
+            </p>
+
+            <button
+              onClick={() => setActiveReview(null)}
+              className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
       <div className="bg-gray-900 border border-gray-700 shadow-xl rounded-7xl w-full max-w-5xl h-full flex flex-col relative ">
         <div className="flex-1 relative overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hide-scrollbar">
           <Editor

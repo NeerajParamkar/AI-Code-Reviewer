@@ -7,3 +7,23 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;     /* Firefox */
 }
+
+/* Dark minimal scrollbar */
+.dark-scroll::-webkit-scrollbar {
+  width: 6px;               /* smaller width */
+}
+
+.dark-scroll::-webkit-scrollbar-track {
+  background: #1f2937;      /* dark gray track */
+  border-radius: 8px;
+}
+
+.dark-scroll::-webkit-scrollbar-thumb {
+  background: #4b5563;      /* dark thumb */
+  border-radius: 8px;
+}
+
+.dark-scroll::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;      /* lighter on hover */
+}
+

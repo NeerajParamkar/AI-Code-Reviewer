@@ -6,9 +6,8 @@ import Markdown from "react-markdown";
 import Prism from "prismjs";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
-import Dropdown from '../components/dropdown'
-import SelectedTask from '../components/selectTask'
-
+import SignUp from "../components/signUp";
+import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const [code, setCode] = useState("");
@@ -24,6 +23,9 @@ function App() {
   const [storeResponce, setStoreResponce] = useState("");
   const [navbar, setNavbar] = useState(false);
   const [responceData, setResponceData] = useState(false);
+  const [responcesTOshow, setresponcesTOshow] = useState("");
+  const [openLogin, setOpenlogin] = useState(false);
+
 
 
 
@@ -32,15 +34,28 @@ function App() {
     try {
       const response = await axios.post("http://localhost:3000/ai/data", {
         fileName,review,code
-      });
-      console.log(response.data)
-    } catch (err) {
-      setReview("⚠️ Error in saving the responce");
+      },{ withCredentials: true } );
+    if(response.data.success) toast.success("Response saved!"); 
+    else toast.error("Response Not saved!"); 
+    console.log(response)
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
     }
     setIsOpen(false);
     setFileName("");
   };
 
+  const GetSavedResponces=async ()=>{
+    try {
+      const savedResponces = await axios.get("http://localhost:3000/getdata", {
+  withCredentials: true
+});
+      setresponcesTOshow(savedResponces.data.user.reviews)
+      console.log(savedResponces.data.user.reviews[0])
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message);
+    }
+  }
   const options1 = ["Review Code","Fix Bugs","Calculate TC and SC"];
   const options2 = ["JavaScript", "Python", "C++", "Java","Other"];
 
@@ -87,22 +102,37 @@ useEffect(() => {
 
   return (
     <>
+    <Toaster position="top-right" reverseOrder={false} />
     <main className="h-screen w-full bg-gradient-to-br from-gray-950 to-gray-900 flex items-center justify-center p-6">
+       {openLogin && <SignUp openLogin={openLogin} setOpenlogin={setOpenlogin}/>}
     <div onClick={()=>{navbar ? setNavbar(false): setNavbar(true)}} className="bg-gradient-to-r from-purple-600 to-indigo-600 cursor-pointer absolute right-5 top-5 rounded-full p-2 px-3 z-888">N</div>
     {navbar && (<div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl shadow-lg absolute right-15 top-5 h-29 w-40 p-3 z-888 ">
-  <button className="px-3 m-2 py-1 w-33 bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition">
+  <button onClick={()=> {setOpenlogin(true),navbar ? setNavbar(false): setNavbar(true)}}  className="px-3 m-2 py-1 w-33 bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition">
     View Profile
   </button>
-  <button onClick={()=>{setResponceData(true),setNavbar(false)}} className="cursor-pointer px-3 py-1 m-2 w-33  bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition opacity-900">
+  <button onClick={()=>{setResponceData(true),setNavbar(false),GetSavedResponces()}} className="cursor-pointer px-3 py-1 m-2 w-33  bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition opacity-900">
     See Responses
   </button>
 </div>
 )}
-    {responceData &&(
-      <div className="bg-gradient-to-r from-gray-600 to-gray-800 rounded-xl shadow-lg absolute h-[80%] w-[90%] m-100 p-3 z-888 flex">This is saved responce <div onClick={()=>{setResponceData(false)}} className="absolute right-6 bg-amber-50 p-3 rounded-full cursor-pointer">X</div></div>
+
+    {responceData && responcesTOshow && (
+      <div className="bg-gradient-to-r from-gray-600 to-gray-800 rounded-xl shadow-lg absolute h-[80%] w-[90%] m-100 p-3 z-888 overflow-y-auto hide-scrollbar">{responcesTOshow && (
+        responcesTOshow.map((item, idx) => (
+          <div key={idx}>
+            <p>{item.reviewName}</p>
+            <p>{item.reviewData}</p>
+            <p>{item.reviewCode}</p>
+            <p>{item.createdAt}</p>
+          </div>
+        ))
+
+        
+      
+    )}<div onClick={()=>{setResponceData(false)}} className="absolute right-6 top-5 bg-amber-50 p-3 rounded-full cursor-pointer ">X</div></div>
     )}
       <div className="bg-gray-900 border border-gray-700 shadow-xl rounded-7xl w-full max-w-5xl h-full flex flex-col relative ">
-        <div className="flex-1 relative overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+        <div className="flex-1 relative overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800 hide-scrollbar">
           <Editor
             value={code}
             onValueChange={(newCode) => setCode(newCode)}

@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import toast from "react-hot-toast";
 
-const SignUp = ({openLogin, setOpenlogin}) => {
+const SignUp = ({openLogin, setOpenlogin,setFname,setcheckAuth}) => {
   const [formData, setFormData] = useState({
     userName: "",
     email: "",
@@ -26,6 +26,8 @@ const SignUp = ({openLogin, setOpenlogin}) => {
             },{ withCredentials: true })
             if (profilebackend.data.success) {
               localStorage.setItem("token", profilebackend.data.token);
+              setFname(profilebackend.data.user.userName[0].toUpperCase())
+              setcheckAuth(true)
               toast.success("🎉 Account created successfully!");
               setOpenlogin(false)
             } else {
@@ -40,9 +42,10 @@ const SignUp = ({openLogin, setOpenlogin}) => {
               email,password
             },{ withCredentials: true })
             if (profilebackend.data.success) {
-              toast.success(profilebackend.data.message);
+              setFname(profilebackend.data.getUser.userName[0].toUpperCase())
+              setcheckAuth(true)
               setOpenlogin(false)
-
+              toast.success(profilebackend.data.message);
             } else {
               toast.error(profilebackend.data.message);
             }

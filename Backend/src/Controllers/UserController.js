@@ -59,12 +59,33 @@ if (!getUser) {
   sameSite: 'lax',
   maxAge: 7 * 24 * 60 * 60 * 1000,
 });
-res.status(200).json({ message: "Login successful", success: true, token });
+res.status(200).json({ message: "Login successful", success: true,getUser,token });
 
   } catch (error) {
     res.status(500).json({ message: "Something went wrong", success: false });
   }
 }
+export const LogoutUser = async (req, res) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged out successfully 🚀",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Logout failed",
+      error: error.message,
+    });
+  }
+};
+
 export const storeData =async (req,res)=>{
 
   try {
@@ -98,7 +119,16 @@ const userId =user._id;
   }
 
 }
-
+export const DeleteData =async (req,res) =>{
+  const {reid,usid}=req.body
+  await User.findByIdAndUpdate(
+  usid,
+  { $pull: { reviews: reid } },  
+  { new: true } 
+);
+await ReviewedData.findByIdAndDelete(reid)
+  res.json({message:"Reponce Deleted"})
+}
 export const getData=async (req,res)=>{
   const id=req.user.id
   const user = await User.findById(id).populate("reviews");

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import "prismjs/themes/prism-tomorrow.css";
 import Editor from "react-simple-code-editor";
 import axios from "axios";
@@ -26,6 +26,11 @@ function App() {
   const [responcesTOshow, setresponcesTOshow] = useState("");
   const [openLogin, setOpenlogin] = useState(false);
   const [activeReview, setActiveReview] = useState(null);
+  const [Fname, setFname] = useState("O");
+  const [checkAuth,setcheckAuth ] = useState(false);
+  const [deleteResponce,setdeleteResponce ] = useState(false);
+  const [Userid,setUserid ] = useState('');
+  
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleString("en-IN", {
@@ -33,7 +38,47 @@ function App() {
       timeStyle: "short",
     });
   };
+  if(deleteResponce){
+    const deleteres = async ()=>{
+      // console.log("Responce deleted")
+      let reid=activeReview._id
+      let usid=Userid
+      const delres=await axios.post("http://localhost:3000/deletedata",{reid,usid},{withCredentials: true})
+      if(delres){
+      toast.success(delres.data.message)
+        setActiveReview(null)
+        GetSavedResponces()
+      }
+      else toast.error("Responce Cant Deleted")
+    }
+    deleteres()
+  }
+  if(deleteResponce) setdeleteResponce(false)
+    
+const serverStart = async ()=>{
+  try {
+    const response = await axios.get("http://localhost:3000/",{ withCredentials: true } );
+    setcheckAuth(true)
+    setFname(response.data.uname[0].toUpperCase())
+    setTimeout(() => {
+      toast.success(`Welcome ${response.data.uname}`);
+    }, 700);
 
+  } catch (error) {
+    setTimeout(() => {
+      toast.error(error.response?.data?.message || error.message);
+    }, 700);
+  }
+}
+
+const didRun = useRef(false);
+
+useEffect(() => {
+  if (!didRun.current) {
+    serverStart();
+    didRun.current = true;
+  }
+}, []);
 
     const handleSave = async () => {
     console.log("Saving response as:", fileName)
@@ -50,6 +95,14 @@ function App() {
     setIsOpen(false);
     setFileName("");
   };
+const handleLogout = async () => {
+  try {
+    await axios.post("http://localhost:3000/logout", {}, { withCredentials: true });
+    toast.success("You have logged out!");
+  } catch (err) {
+    toast.error("Logout failed");
+  }
+};
 
   const GetSavedResponces=async ()=>{
     try {
@@ -57,7 +110,7 @@ function App() {
   withCredentials: true
 });
       setresponcesTOshow(savedResponces.data.user.reviews)
-      console.log(savedResponces.data.user.reviews[0])
+      setUserid(savedResponces.data.user._id)
     } catch (error) {
       toast.error(error.response?.data?.message || error.message);
     }
@@ -78,13 +131,13 @@ function App() {
 }, [selected, selectedTask]);
 
 
-useEffect(() => {
-  if (responceData) {
-    document.body.classList.add("overflow-hidden");
-  } else {
-    document.body.classList.remove("overflow-hidden");
-  }
-}, [responceData]);
+// useEffect(() => {
+//   if (responceData) {
+//     document.body.classList.add("overflow-hidden");
+//   } else {
+//     document.body.classList.remove("overflow-hidden");
+//   }
+// }, [responceData]);
   async function reviewCode() {
     try {
       setLoading(true);
@@ -110,18 +163,21 @@ useEffect(() => {
     <>
     <Toaster position="top-right" reverseOrder={false} />
     <main className="h-screen w-full bg-gradient-to-br from-gray-950 to-gray-900 flex items-center justify-center p-6">
-       {openLogin && <SignUp openLogin={openLogin} setOpenlogin={setOpenlogin}/>}
-    <div onClick={()=>{navbar ? setNavbar(false): setNavbar(true)}} className="bg-gradient-to-r from-purple-600 to-indigo-600 cursor-pointer absolute right-5 top-5 rounded-full p-2 px-3 z-888">N</div>
+       {openLogin && <SignUp openLogin={openLogin} setOpenlogin={setOpenlogin} setFname={setFname} setcheckAuth={setcheckAuth}/>}
+    <div onClick={()=>{navbar ? setNavbar(false): setNavbar(true)}} className="bg-gradient-to-r from-purple-600 to-indigo-600 cursor-pointer absolute right-5 top-5 rounded-full p-2 px-3 z-888">{Fname}</div>
     {navbar && (<div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl shadow-lg absolute right-15 top-5 h-29 w-40 p-3 z-888 ">
-  <button onClick={()=> {setOpenlogin(true),navbar ? setNavbar(false): setNavbar(true)}}  className="px-3 m-2 py-1 w-33 bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition">
-    View Profile
-  </button>
+      {checkAuth ? (<button onClick={()=> {handleLogout(),navbar ? setNavbar(false): setNavbar(true),setFname("O"),setcheckAuth(false),setresponcesTOshow("")}}  className="px-3 m-2 py-1 w-33 bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition">
+    Logout
+  </button>):(<button onClick={()=> {setOpenlogin(true),navbar ? setNavbar(false): setNavbar(true)}}  className="px-3 m-2 py-1 w-33 bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition">
+    SignIn
+  </button>)}
+  
+  
   <button onClick={()=>{setResponceData(true),setNavbar(false),GetSavedResponces()}} className="cursor-pointer px-3 py-1 m-2 w-33  bg-gray-700 text-gray-200 rounded-lg shadow hover:bg-gray-600 transition opacity-900">
     See Responses
   </button>
 </div>
 )}
-
     {responceData && responcesTOshow && (
        <div className="dark-scroll bg-gradient-to-r from-gray-400 to-gray-400 rounded-xl shadow-lg absolute h-[80%] w-[90%] p-4 z-50 overflow-y-auto ">
       <div
@@ -155,7 +211,7 @@ useEffect(() => {
           ))}
         </div>
       ) : (
-        <p className="text-gray-300">No responses saved yet.</p>
+        <p className="text-gray-900">No responses saved yet.</p>
       )}
 
       {/* Modal for full details */}
@@ -185,9 +241,15 @@ useEffect(() => {
 
             <button
               onClick={() => setActiveReview(null)}
-              className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
+              className="mt-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition cursor-pointer"
             >
               Close
+            </button>
+            <button
+              onClick={() => setdeleteResponce(true)}
+              className="absolute right-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition cursor-pointer"
+            >
+              Delete Responce
             </button>
           </div>
         </div>
